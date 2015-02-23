@@ -1,0 +1,6 @@
+name = File archive
+description = Provide a new field to archive files of a file field.
+core = 7.x
+version = 7.x-1.x
+
+dependencies[] = kore
