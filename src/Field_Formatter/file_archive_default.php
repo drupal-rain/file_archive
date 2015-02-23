@@ -21,7 +21,11 @@ class file_archive_default extends Field_Formatter\Field_Formatter_Abstract {
   }
 
   public static function view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
-    return NULL;
+    $element = array();
+    $file = file_load($items[0]['fid']);
+    $element[0] = theme('file_link', array('file' => $file));
+
+    return $element;
   }
 
 }
