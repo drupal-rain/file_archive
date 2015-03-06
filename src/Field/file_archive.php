@@ -114,10 +114,10 @@ class file_archive extends Field\Field_Abscract {
   }
 
   public static function is_empty($item, $field) {
-    if (isset($item['title'])) {
-      return TRUE;
+    if (isset($item['title']) && $item['archive']) {
+      return FALSE;
     }
-    return FALSE;
+    return TRUE;
   }
 
   /**
@@ -125,26 +125,40 @@ class file_archive extends Field\Field_Abscract {
    */
   public static function load($entity_type, $entities, $field, $instances, $langcode, &$items, $age) {
     foreach ($items as $id => $item) {
-      $items[$id][0]['files'] = unserialize($item[0]['files']);
+      if ($item) {
+        $items[$id][0]['files'] = unserialize($item[0]['files']);
+      }
     }
+  }
+
+  /**
+   * Prepare 'files'.
+   */
+  public static function presave($entity_type, $entity, $field, $instance, $langcode, &$items) {
+    if (count($items) == 0) {
+      return;
+    }
+    
+    $file_items = field_get_items($entity_type, $entity, $instance['settings']['file_field'], $langcode);
+    $files = array();
+    foreach ($file_items as $file_item) {
+      $files[] = $file_item['fid'];
+    }
+    $items[0]['files'] = serialize($files);
   }
 
   /**
    * Save archive file.
    */
   public static function save($entity_type, $entity, $field, $instance, $langcode, &$items) {
-    $file_items = field_get_items($entity_type, $entity, $instance['settings']['file_field'], $langcode);
-    $files = array();
-    foreach ($file_items as $file_item) {
-      $files[] = $file_item['fid'];
+    if (count($items) == 0) {
+      return;
     }
 
-    // Give it a default title
-    if (empty($items[0]['title'])) {
-      $items[0]['title'] = 'Archive';
-    }
+    // @todo Description field.
 
     // Archive field value
+    $files = unserialize($items[0]['files']);
     list($id, $vid, $bundle) = entity_extract_ids($entity_type, $entity);
     $entity_unchanged = entity_load_unchanged($entity_type, $id);
     $items_unchanged = field_get_items($entity_type, $entity_unchanged, $instance['field_name'], $langcode);
@@ -167,7 +181,6 @@ class file_archive extends Field\Field_Abscract {
     $archive = $archiver->save();
     // dpm($archive);
     $items[0]['fid'] = $archive->fid;
-    $items[0]['files'] = serialize($files);
   }
 
   /**

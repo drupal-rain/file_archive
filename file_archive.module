@@ -1,1 +1,9 @@
 <?php
+
+function file_archive_checkbox_value_callback($element, $input = FALSE, $form_state) {
+  dpm($element);
+}
+
+function file_archive_checkbox_submit($form, &$form_state) {
+  dpm($form_state);
+}
