@@ -114,7 +114,7 @@ class file_archive extends Field\Field_Abscract {
   }
 
   public static function is_empty($item, $field) {
-    if (isset($item['title']) && $item['archive']) {
+    if (!empty($item['title']) && $item['archive']) {
       return FALSE;
     }
     return TRUE;
